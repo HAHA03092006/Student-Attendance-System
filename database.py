@@ -24,31 +24,119 @@ def init_db():
     finally:
         conn.close()
 
-# === THÊM: CRUD CHO COURSE, LECTURER, ENROLLMENT ===
-def get_all_courses():
+def row_to_dict(row):
+    return dict(row) if row else None
+
+def rows_to_list(rows):
+    return [row_to_dict(r) for r in rows]
+
+# === AUTH ===
+def get_user_by_username(username: str):
     conn = get_connection()
     try:
-        cur = conn.execute("SELECT * FROM Course")
-        return [dict(row) for row in cur.fetchall()]
+        cur = conn.execute("SELECT * FROM users WHERE username = ? AND is_active = 1", (username,))
+        return row_to_dict(cur.fetchone())
     finally:
         conn.close()
 
-def get_all_lecturers():
+# === TEACHER & STUDENT ===
+def get_teacher_by_user_id(user_id: int):
     conn = get_connection()
     try:
-        cur = conn.execute("SELECT l.*, u.full_name FROM Lecturer l JOIN users u ON l.user_id = u.id")
-        return [dict(row) for row in cur.fetchall()]
+        cur = conn.execute("SELECT t.*, u.full_name FROM teachers t JOIN users u ON u.id = t.user_id WHERE t.user_id = ?", (user_id,))
+        return row_to_dict(cur.fetchone())
     finally:
         conn.close()
 
-def enroll_student(student_id, class_id, enrollment_date=None, status="Active"):
+def get_student_by_user_id(user_id: int):
     conn = get_connection()
     try:
-        conn.execute("""
-            INSERT INTO Enrollment (student_id, class_id, enrollment_date, status)
-            VALUES (?, ?, ?, ?)
-        """, (student_id, class_id, enrollment_date or datetime.now().date(), status))
+        cur = conn.execute("SELECT s.*, u.full_name FROM students s JOIN users u ON u.id = s.user_id WHERE s.user_id = ?", (user_id,))
+        return row_to_dict(cur.fetchone())
+    finally:
+        conn.close()
+
+# === CLASS & SUBJECT ===
+def get_classes_for_teacher(teacher_id: int):
+    conn = get_connection()
+    try:
+        cur = conn.execute("""
+            SELECT cs.id AS class_subject_id, c.id AS class_id, c.class_code, c.class_name,
+                   s.id AS subject_id, s.subject_code, s.subject_name
+            FROM class_subjects cs
+            JOIN classes c ON c.id = cs.class_id
+            JOIN subjects s ON s.id = cs.subject_id
+            WHERE cs.teacher_id = ?
+        """, (teacher_id,))
+        return rows_to_list(cur.fetchall())
+    finally:
+        conn.close()
+
+def get_students_in_class(class_id: int):
+    conn = get_connection()
+    try:
+        cur = conn.execute("""
+            SELECT s.id AS student_id, s.student_code, u.full_name, s.gender, u.email
+            FROM students s JOIN users u ON u.id = s.user_id
+            WHERE s.class_id = ?
+        """, (class_id,))
+        return rows_to_list(cur.fetchall())
+    finally:
+        conn.close()
+
+# === SESSION ===
+def create_attendance_session(class_subject_id, session_code, date_str, created_by):
+    conn = get_connection()
+    try:
+        cur = conn.execute("""
+            INSERT INTO attendance_sessions (class_subject_id, session_code, date, status, created_by)
+            VALUES (?, ?, ?, 'ACTIVE', ?)
+        """, (class_subject_id, session_code, date_str, created_by))
         conn.commit()
+        return cur.lastrowid
+    finally:
+        conn.close()
+
+def get_open_session_for_class_subject(class_subject_id):
+    conn = get_connection()
+    try:
+        cur = conn.execute("SELECT * FROM attendance_sessions WHERE class_subject_id = ? AND status = 'ACTIVE'", (class_subject_id,))
+        return row_to_dict(cur.fetchone())
+    finally:
+        conn.close()
+
+def close_attendance_session(session_id):
+    conn = get_connection()
+    try:
+        conn.execute("UPDATE attendance_sessions SET status = 'CLOSED', end_time = CURRENT_TIMESTAMP WHERE id = ?", (session_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+# === ATTENDANCE ===
+def upsert_attendance_record(session_id, student_id, status, note, updated_by):
+    conn = get_connection()
+    try:
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        conn.execute("""
+            INSERT OR REPLACE INTO Attendance (session_id, student_id, status, note, marked_at, updated_at, updated_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (session_id, student_id, status, note, now, now, updated_by))
+        conn.commit()
+    finally:
+        conn.close()
+
+def get_attendance_records_for_session(session_id):
+    conn = get_connection()
+    try:
+        cur = conn.execute("""
+            SELECT ar.*, s.student_code, u.full_name
+            FROM Attendance ar
+            JOIN students s ON s.id = ar.student_id
+            JOIN users u ON u.id = s.user_id
+            WHERE ar.session_id = ?
+        """, (session_id,))
+        return rows_to_list(cur.fetchall())
     finally:
         conn.close()
 
@@ -58,14 +146,13 @@ def student_mark_attendance(student_id, session_id, status="PRESENT", note=None)
     try:
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         conn.execute("""
-            INSERT OR REPLACE INTO Attendance (student_id, session_id, status, note, marked_at)
+            INSERT OR REPLACE INTO Attendance (session_id, student_id, status, note, marked_at)
             VALUES (?, ?, ?, ?, ?)
-        """, (student_id, session_id, status, note, now))
+        """, (session_id, student_id, status, note, now))
         conn.commit()
     finally:
         conn.close()
 
-# === LẤY PHIÊN ĐIỂM DANH ĐANG MỞ CHO STUDENT ===
 def get_open_sessions_for_student(student_id):
     conn = get_connection()
     try:
@@ -78,6 +165,43 @@ def get_open_sessions_for_student(student_id):
             JOIN Enrollment e ON e.class_id = c.id
             WHERE e.student_id = ? AND s.status = 'ACTIVE'
         """, (student_id,))
-        return [dict(row) for row in cur.fetchall()]
+        return rows_to_list(cur.fetchall())
+    finally:
+        conn.close()
+
+# === REPORT ===
+def get_student_attendance_history(student_id):
+    conn = get_connection()
+    try:
+        cur = conn.execute("""
+            SELECT ar.status, ar.note, ar.marked_at, asess.date, c.class_code, subj.subject_name
+            FROM Attendance ar
+            JOIN attendance_sessions asess ON asess.id = ar.session_id
+            JOIN class_subjects cs ON cs.id = asess.class_subject_id
+            JOIN classes c ON c.id = cs.class_id
+            JOIN subjects subj ON subj.id = cs.subject_id
+            WHERE ar.student_id = ?
+            ORDER BY asess.date DESC
+        """, (student_id,))
+        return rows_to_list(cur.fetchall())
+    finally:
+        conn.close()
+
+def get_class_daily_report(class_id):
+    conn = get_connection()
+    try:
+        cur = conn.execute("""
+            SELECT asess.date,
+                   COUNT(ar.id) AS total_records,
+                   SUM(CASE WHEN ar.status = 'PRESENT' THEN 1 ELSE 0 END) AS present_count,
+                   SUM(CASE WHEN ar.status LIKE 'ABSENT%' THEN 1 ELSE 0 END) AS absent_count,
+                   SUM(CASE WHEN ar.status = 'LATE' THEN 1 ELSE 0 END) AS late_count
+            FROM attendance_sessions asess
+            LEFT JOIN Attendance ar ON ar.session_id = asess.id
+            JOIN class_subjects cs ON cs.id = asess.class_subject_id
+            WHERE cs.class_id = ?
+            GROUP BY asess.date
+        """, (class_id,))
+        return rows_to_list(cur.fetchall())
     finally:
         conn.close()
