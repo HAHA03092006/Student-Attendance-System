@@ -43,6 +43,7 @@ text
    cd attendance-system
 
 2.Chạy
+
 bash
 &nbsp;&nbsp;&nbsp;docker-compose up --build &nbsp;&nbsp;&nbsp;
    → Thành công khi thấy:
