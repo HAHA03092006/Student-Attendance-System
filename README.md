@@ -1,78 +1,78 @@
-# Hệ Thống Điểm Danh Sinh Viên (Student Attendance System)
+# Student Attendance Management System
 
-> **Đồ án môn học Công Nghệ Phần Mềm - Nhóm 03**  
-> **Hoàn thành:** 17/11/2025  
-> **Môi trường:** Python 3.11 + SQLite + Tkinter + Docker
+> **Software Engineering Course Project - Group 03**  
+> **Completed:** November 17, 2025  
+> **Tech Stack:** Python 3.11 + SQLite + Tkinter + Docker
 
-## 📋 Mục lục
+## 📋 Table of Contents
 
-- [Tổng quan](#tổng-quan)
-- [Tính năng](#tính-năng)
-- [Công nghệ](#công-nghệ)
-- [Cài đặt](#cài-đặt)
-- [Sử dụng](#sử-dụng)
+- [Overview](#overview)
+- [Features](#features)
+- [Technologies](#technologies)
+- [Installation](#installation)
+- [Usage](#usage)
 - [Testing](#testing)
-- [Đóng góp](#đóng-góp)
+- [Contributing](#contributing)
 
-## 🎯 Tổng quan
+## 🎯 Overview
 
-Hệ thống quản lý điểm danh sinh viên với 3 vai trò (Admin, Giáo viên, Sinh viên), hỗ trợ:
-- ✅ Sinh viên **tự điểm danh** qua session code
-- ✅ Giáo viên mở/đóng buổi học, điểm danh manual
-- ✅ Admin xuất báo cáo tổng hợp toàn trường
-- ✅ Bảo mật SHA-256, SQL injection prevention
-- ✅ Giao diện tiếng Việt đầy đủ
+A comprehensive student attendance management system with 3 user roles (Admin, Teacher, Student), featuring:
+- ✅ Student **self-check-in** via session code
+- ✅ Teacher-managed session creation and manual attendance marking
+- ✅ Admin school-wide consolidated reporting
+- ✅ SHA-256 security & SQL injection prevention
+- ✅ Full Vietnamese language interface
 
-## 🚀 Tính năng chính
+## 🚀 Key Features
 
-### 👤 Vai trò & Quyền hạn
+### 👤 Roles & Permissions
 
-| Vai trò | Chức năng |
-|---------|-----------|
-| **Admin** | • Quản lý người dùng (CRUD)<br>• Quản lý lớp học, môn học<br>• Xuất báo cáo tổng hợp (Excel/PDF)<br>• Xem thống kê toàn trường |
-| **Giáo viên** | • Mở buổi học (tạo session code)<br>• Điểm danh thủ công<br>• Đóng buổi học<br>• Xem báo cáo lớp (ngày/tuần/tháng)<br>• Sửa điểm danh (có ghi chú) |
-| **Sinh viên** | • **Tự điểm danh** qua session code<br>• Xem lịch sử điểm danh cá nhân<br>• Nhận thông báo điểm danh thành công<br>• Chọn lý do vắng (có phép/không phép) |
+| Role | Functions |
+|------|-----------|
+| **Admin** | • User management (CRUD)<br>• Class and course management<br>• Export consolidated reports (Excel/PDF)<br>• View school-wide statistics |
+| **Teacher** | • Create attendance sessions (generate session code)<br>• Manual attendance marking<br>• Close attendance sessions<br>• View class reports (daily/weekly/monthly)<br>• Edit attendance records (with notes) |
+| **Student** | • **Self-check-in** via session code<br>• View personal attendance history<br>• Receive attendance confirmation notifications<br>• Select absence reason (excused/unexcused) |
 
-### 📊 Báo cáo tổng hợp
+### 📊 Consolidated Reporting
 
-Admin có thể xuất báo cáo bao gồm:
-- Sĩ số từng lớp
-- Số buổi học đã tổ chức
-- Tổng số lượt: Có mặt / Vắng / Muộn
-- **Tỉ lệ điểm danh (%)** theo lớp/khoa
+Admin can export reports including:
+- Class enrollment numbers
+- Number of sessions conducted
+- Total attendance counts: Present / Absent / Late
+- **Attendance rate (%)** by class/department
 
-## 🔒 Bảo mật & Hiệu năng
+## 🔒 Security & Performance
 
-### Bảo mật
-- ✅ **Mật khẩu:** SHA-256 hash + salt
+### Security
+- ✅ **Passwords:** SHA-256 hash + salt
 - ✅ **SQL Injection:** 100% parameterized queries
 - ✅ **Input validation:** Email format, username constraints
-- ✅ **Session management:** Timeout sau 30 phút không hoạt động
-- ✅ **CSRF protection:** Token validation cho mọi form
+- ✅ **Session management:** 30-minute timeout for inactivity
+- ✅ **CSRF protection:** Token validation for all forms
 
-### Hiệu năng
-- ✅ Load danh sách 100 sinh viên < 5 giây
-- ✅ Xử lý điểm danh đồng thời 50 user
-- ✅ Database indexing cho queries nhanh
-- ✅ Lazy loading cho báo cáo lớn
+### Performance
+- ✅ Load list of 100 students in < 5 seconds
+- ✅ Handle 50 concurrent user check-ins
+- ✅ Database indexing for fast queries
+- ✅ Lazy loading for large reports
 
 ### Error Handling
-- ✅ Try-catch toàn bộ database operations
-- ✅ Graceful degradation khi network error
-- ✅ User-friendly error messages (tiếng Việt)
-- ✅ Auto-retry cho failed queries
+- ✅ Try-catch blocks for all database operations
+- ✅ Graceful degradation on network errors
+- ✅ User-friendly error messages (Vietnamese)
+- ✅ Auto-retry for failed queries
 
-## 🛠️ Công nghệ
+## 🛠️ Technologies
 
-| Công nghệ | Phiên bản | Mục đích |
-|-----------|-----------|----------|
+| Technology | Version | Purpose |
+|------------|---------|---------|
 | **Python** | 3.11 | Backend logic |
 | **SQLite** | 3.36+ | Database |
-| **Tkinter** | Built-in | GUI desktop |
+| **Tkinter** | Built-in | Desktop GUI |
 | **Docker** | 20.10+ | Containerization |
 | **hashlib** | Standard lib | Password hashing |
 
-## 📁 Cấu trúc dự án
+## 📁 Project Structure
 
 ```
 attendance-system/
@@ -94,61 +94,61 @@ attendance-system/
 └── README.md
 ```
 
-## 💻 Cài đặt
+## 💻 Installation
 
-### Yêu cầu hệ thống
+### System Requirements
 
-**Option 1: Docker (Khuyến nghị)**
+**Option 1: Docker (Recommended)**
 - Docker Desktop 20.10+
 - Docker Compose 2.0+
-- 2GB RAM khả dụng
+- 2GB available RAM
 
 **Option 2: Local**
 - Python 3.11+
-- Tkinter (đã có sẵn trong Python Windows/Mac)
+- Tkinter (pre-installed on Windows/Mac Python)
 - Linux: `sudo apt install python3-tk`
 
 ---
 
-## 🏃 Hướng dẫn chạy
+## 🏃 Running the Application
 
-### 🐳 **Chạy với Docker (Khuyến nghị)**
+### 🐳 **Run with Docker (Recommended)**
 
-#### 1. Clone project
+#### 1. Clone the project
 ```bash
 git clone https://github.com/your-repo/attendance-system.git
 cd attendance-system
 ```
 
-#### 2. Build và chạy
+#### 2. Build and run
 ```bash
 docker-compose up --build
 ```
 
-**Thành công khi thấy:**
+**Success indicators:**
 ```
 ✔ Container group03-attendance created
 ✔ DB initialized with seed data
 ✔ GUI started successfully
 ```
 
-#### 3. Thiết lập Display (tùy hệ điều hành)
+#### 3. Display Setup (OS-specific)
 
 **Windows:**
-1. Cài [VcXsrv](https://sourceforge.net/projects/vcxsrv/)
-2. Chạy XLaunch với cấu hình:
+1. Install [VcXsrv](https://sourceforge.net/projects/vcxsrv/)
+2. Launch XLaunch with configuration:
    - Multiple windows → Start no client → **Disable access control** ✅
-3. Chạy lại: `docker-compose up`
+3. Re-run: `docker-compose up`
 
 **macOS:**
 ```bash
-# Cài XQuartz
+# Install XQuartz
 brew install --cask xquartz
 
-# Cho phép network connections
+# Allow network connections
 xhost + 127.0.0.1
 
-# Chạy
+# Run
 docker-compose up
 ```
 
@@ -158,51 +158,51 @@ xhost +local:docker
 docker-compose up
 ```
 
-#### 4. Dừng hệ thống
+#### 4. Stop the system
 ```bash
 docker-compose down
 
-# Xóa data (reset database)
+# Delete data (reset database)
 docker-compose down -v
 ```
 
-### 🖥️ **Chạy Local (không dùng Docker)**
+### 🖥️ **Run Locally (without Docker)**
 
-#### 1. Cài đặt dependencies
+#### 1. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-#### 2. Khởi tạo database
+#### 2. Initialize database
 ```bash
 python -c "from src.database import init_db; init_db()"
 ```
 
-**Thấy:** `DB initialized with seed data.` → Thành công
+**Expected output:** `DB initialized with seed data.` → Success
 
-#### 3. Chạy ứng dụng
+#### 3. Run the application
 ```bash
 python src/gui.py
 ```
 
-## 🔑 Đăng nhập mẫu
+## 🔑 Sample Login Credentials
 
-> **⚠️ LƯU Ý:** Passwords dưới đây chỉ để demo. Trong database thực tế đã được hash SHA-256.
+> **⚠️ NOTE:** Passwords below are for demo purposes only. In the actual database, they are hashed with SHA-256.
 
-| Username | Password | Vai trò | Mô tả |
-|----------|----------|---------|--------|
-| `admin` | `admin123` | **ADMIN** | Quản trị viên |
-| `t_giang` | `teacher123` | **TEACHER** | Giáo viên mẫu |
-| `sv001` | `student123` | **STUDENT** | Sinh viên Nguyễn Văn A |
-| `sv002` | `student123` | **STUDENT** | Sinh viên Trần Thị B |
-| `sv003` | `student123` | **STUDENT** | Sinh viên Lê Văn C |
+| Username | Password | Role | Description |
+|----------|----------|------|-------------|
+| `admin` | `admin123` | **ADMIN** | System administrator |
+| `t_giang` | `teacher123` | **TEACHER** | Sample teacher |
+| `sv001` | `student123` | **STUDENT** | Student Nguyen Van A |
+| `sv002` | `student123` | **STUDENT** | Student Tran Thi B |
+| `sv003` | `student123` | **STUDENT** | Student Le Van C |
 
-**Hash SHA-256 của `admin123`:**
+**SHA-256 hash of `admin123`:**
 ```
 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
 ```
 
-## 🎨 Giao diện (Screenshots)
+## 🎨 User Interface (Screenshots)
 
 ### Login Screen
 ![Login](docs/screenshots/login.png)
@@ -221,9 +221,9 @@ python src/gui.py
 ### Test Coverage
 - ✅ **18 test cases** – 100% functional coverage
 - ✅ **6 test cases** – Non-functional (security, performance)
-- 📄 Chi tiết: [Testing_Document.xlsx](docs/Testing_Document.xlsx)
+- 📄 Details: [Testing_Document.xlsx](docs/Testing_Document.xlsx)
 
-### Chạy tests
+### Run tests
 ```bash
 # Unit tests
 python -m pytest tests/
@@ -235,27 +235,27 @@ python -m pytest tests/integration/
 python tests/performance_test.py
 ```
 
-### Test Cases chính
+### Main Test Cases
 
-| ID | Chức năng | Test Type | Status |
-|----|-----------|-----------|--------|
-| TC01 | Login hợp lệ | Functional | ✅ Pass |
-| TC02 | Login sai password | Functional | ✅ Pass |
-| TC06 | Đăng ký tài khoản | Functional | ✅ Pass |
-| TC10 | Điểm danh thủ công | Functional | ✅ Pass |
-| TC14 | **Student tự điểm danh** | Functional | ✅ Pass |
-| TC16 | Báo cáo tổng hợp | Functional | ✅ Pass |
+| ID | Function | Test Type | Status |
+|----|----------|-----------|--------|
+| TC01 | Valid login | Functional | ✅ Pass |
+| TC02 | Invalid password login | Functional | ✅ Pass |
+| TC06 | User registration | Functional | ✅ Pass |
+| TC10 | Manual attendance marking | Functional | ✅ Pass |
+| TC14 | **Student self-check-in** | Functional | ✅ Pass |
+| TC16 | Consolidated report | Functional | ✅ Pass |
 | TC21 | SQL Injection test | Security | ✅ Pass |
-| TC22 | Password hash verify | Security | ✅ Pass |
+| TC22 | Password hash verification | Security | ✅ Pass |
 | TC23 | Load 100 students <5s | Performance | ✅ Pass |
 
 ## 🐛 Troubleshooting
 
-### Lỗi thường gặp
+### Common Issues
 
-**1. Docker GUI không hiển thị**
+**1. Docker GUI not displaying**
 ```bash
-# Windows: Kiểm tra VcXsrv đang chạy
+# Windows: Verify VcXsrv is running
 # Linux: 
 xhost +local:docker
 export DISPLAY=:0
@@ -263,9 +263,9 @@ export DISPLAY=:0
 
 **2. Database locked**
 ```bash
-# Dừng tất cả containers
+# Stop all containers
 docker-compose down
-# Xóa file lock
+# Remove lock files
 rm data/attendance.db-shm data/attendance.db-wal
 ```
 
@@ -275,25 +275,23 @@ sudo chmod -R 755 data/
 sudo chown -R $USER:$USER data/
 ```
 
-**4. Import error khi chạy local**
+**4. Import error when running locally**
 ```bash
-# Thêm PYTHONPATH
+# Add PYTHONPATH
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 python src/gui.py
 ```
 
 ## 📝 Known Issues & Limitations
 
-### Hiện tại
-- ⚠️ GUI chỉ hỗ trợ 1 instance (không multi-user đồng thời)
-- ⚠️ Không có notification email/SMS
-- ⚠️ Báo cáo chỉ export được Excel (chưa có PDF)
+### Current Limitations
+- ⚠️ GUI supports only 1 instance (no concurrent multi-user support)
+- ⚠️ No email/SMS notifications
+- ⚠️ Reports only export to Excel (PDF not yet supported)
 
-### Future Work
+### Future Enhancements
 - 🔜 Web interface (Flask/FastAPI)
 - 🔜 QR code check-in
 - 🔜 Mobile app (React Native)
 - 🔜 Email notifications
 - 🔜 Face recognition attendance
-
-
