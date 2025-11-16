@@ -35,7 +35,6 @@ text
 
 - **Docker Desktop** (khuyên dùng)
 - Hoặc: Python 3.11 + Tkinter
-- 
 ## Hướng dẫn chạy (Docker – ưu tiên)
 
 1. **Clone / copy project**  
