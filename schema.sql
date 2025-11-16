@@ -157,16 +157,14 @@ CREATE TABLE IF NOT EXISTS Attendance (
     FOREIGN KEY (updated_by) REFERENCES teachers(id)
 );
 
--- =========================================
 -- 13. SEED DATA – NGÀY HIỆN TẠI: 2025-11-16
--- =========================================
-INSERT INTO users (username, password_hash, full_name, email, role) VALUES
-    ('admin',       'admin123',     'Quản trị viên',        'admin@example.com',    'ADMIN'),
-    ('t_giang',     'teacher123',   'Thầy Giảng',           'teacher@example.com',  'TEACHER'),
-    ('sv001',       'student123',   'Nguyễn Văn A',         'sv001@example.com',    'STUDENT'),
-    ('sv002',       'student123',   'Trần Thị B',           'sv002@example.com',    'STUDENT'),
-    ('sv003',       'student123',   'Lê Văn C',             'sv003@example.com',    'STUDENT');
 
+INSERT INTO users (username, password_hash, full_name, email, role) VALUES
+    ('admin',   '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'Quản trị viên', 'admin@example.com', 'ADMIN'),
+    ('t_giang', 'f6c3c2d1b9f9d4e4e9b3d8f7e8d9c0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7', 'Thầy Giảng', 'teacher@example.com', 'TEACHER'),
+    ('sv001',   'f6c3c2d1b9f9d4e4e9b3d8f7e8d9c0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7', 'Nguyễn Văn A', 'sv001@example.com', 'STUDENT'),
+    ('sv002',   'f6c3c2d1b9f9d4e4e9b3d8f7e8d9c0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7', 'Trần Thị B', 'sv002@example.com', 'STUDENT'),
+    ('sv003',   'f6c3c2d1b9f9d4e4e9b3d8f7e8d9c0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7', 'Lê Văn C', 'sv003@example.com', 'STUDENT');
 INSERT INTO teachers (user_id, teacher_code) VALUES (2, 'GV001');
 INSERT INTO Lecturer (user_id, Name, Email, Phone) VALUES (2, 'Thầy Giảng', 'teacher@example.com', '0123456789');
 
