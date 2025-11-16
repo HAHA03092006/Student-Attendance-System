@@ -23,8 +23,6 @@ Hệ thống quản lý điểm danh sinh viên với 3 vai trò (Admin, Giáo v
 - ✅ Bảo mật SHA-256, SQL injection prevention
 - ✅ Giao diện tiếng Việt đầy đủ
 
----
-
 ## 🚀 Tính năng chính
 
 ### 👤 Vai trò & Quyền hạn
@@ -42,8 +40,6 @@ Admin có thể xuất báo cáo bao gồm:
 - Số buổi học đã tổ chức
 - Tổng số lượt: Có mặt / Vắng / Muộn
 - **Tỉ lệ điểm danh (%)** theo lớp/khoa
-
----
 
 ## 🔒 Bảo mật & Hiệu năng
 
@@ -66,8 +62,6 @@ Admin có thể xuất báo cáo bao gồm:
 - ✅ User-friendly error messages (tiếng Việt)
 - ✅ Auto-retry cho failed queries
 
----
-
 ## 🛠️ Công nghệ
 
 | Công nghệ | Phiên bản | Mục đích |
@@ -77,8 +71,6 @@ Admin có thể xuất báo cáo bao gồm:
 | **Tkinter** | Built-in | GUI desktop |
 | **Docker** | 20.10+ | Containerization |
 | **hashlib** | Standard lib | Password hashing |
-
----
 
 ## 📁 Cấu trúc dự án
 
@@ -101,8 +93,6 @@ attendance-system/
 ├── .dockerignore
 └── README.md
 ```
-
----
 
 ## 💻 Cài đặt
 
@@ -176,8 +166,6 @@ docker-compose down
 docker-compose down -v
 ```
 
----
-
 ### 🖥️ **Chạy Local (không dùng Docker)**
 
 #### 1. Cài đặt dependencies
@@ -197,8 +185,6 @@ python -c "from src.database import init_db; init_db()"
 python src/gui.py
 ```
 
----
-
 ## 🔑 Đăng nhập mẫu
 
 > **⚠️ LƯU Ý:** Passwords dưới đây chỉ để demo. Trong database thực tế đã được hash SHA-256.
@@ -216,8 +202,6 @@ python src/gui.py
 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
 ```
 
----
-
 ## 🎨 Giao diện (Screenshots)
 
 ### Login Screen
@@ -231,8 +215,6 @@ python src/gui.py
 
 ### Admin Report
 ![Report](docs/screenshots/admin_report.png)
-
----
 
 ## 🧪 Testing
 
@@ -267,8 +249,6 @@ python tests/performance_test.py
 | TC22 | Password hash verify | Security | ✅ Pass |
 | TC23 | Load 100 students <5s | Performance | ✅ Pass |
 
----
-
 ## 🐛 Troubleshooting
 
 ### Lỗi thường gặp
@@ -302,8 +282,6 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 python src/gui.py
 ```
 
----
-
 ## 📝 Known Issues & Limitations
 
 ### Hiện tại
@@ -318,49 +296,4 @@ python src/gui.py
 - 🔜 Email notifications
 - 🔜 Face recognition attendance
 
----
 
-## 👥 Đóng góp (Contributors)
-
-| Tên | Vai trò | Email |
-|-----|---------|-------|
-| Nguyễn Văn A | Team Leader, Backend | nguyenvana@example.com |
-| Trần Thị B | Database, Testing | tranthib@example.com |
-| Lê Văn C | Frontend, Docker | levanc@example.com |
-
-**Giáo viên hướng dẫn:** TS. Nguyễn Văn X
-
----
-
-## 📄 License
-
-Dự án được phân phối dưới giấy phép MIT. Xem [LICENSE](LICENSE) để biết thêm chi tiết.
-
-```
-MIT License
-
-Copyright (c) 2025 Nhóm 03 - CNPM
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files...
-```
-
----
-
-## 🙏 Acknowledgments
-
-- Trường Đại học ABC
-- Khoa Công nghệ Thông tin
-- Bộ môn Công nghệ Phần mềm
-
----
-
-## 📞 Liên hệ
-
-- **Email nhóm:** group03.cnpm@example.com
-- **Issues:** [GitHub Issues](https://github.com/your-repo/issues)
-- **Docs:** [Wiki](https://github.com/your-repo/wiki)
-
----
-
-**⭐ Nếu project hữu ích, hãy cho chúng tôi 1 star!**
