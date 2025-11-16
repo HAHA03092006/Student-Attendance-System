@@ -1,7 +1,9 @@
 # database.py
 import sqlite3
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
+import secrets
+import string
 
 DB_PATH = "attendance.db"
 SCHEMA_PATH = "schema.sql"
@@ -20,7 +22,7 @@ def init_db():
         with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
             conn.executescript(f.read())
         conn.commit()
-        print("DB + seed created.")
+        print("DB initialized with seed data.")
     finally:
         conn.close()
 
@@ -36,6 +38,33 @@ def get_user_by_username(username: str):
     try:
         cur = conn.execute("SELECT * FROM users WHERE username = ? AND is_active = 1", (username,))
         return row_to_dict(cur.fetchone())
+    finally:
+        conn.close()
+
+def get_user_by_email(email: str):
+    conn = get_connection()
+    try:
+        cur = conn.execute("SELECT * FROM users WHERE email = ? AND is_active = 1", (email,))
+        return row_to_dict(cur.fetchone())
+    finally:
+        conn.close()
+
+# === PASSWORD RESET ===
+def generate_reset_token():
+    return ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
+
+def request_password_reset(email: str):
+    user = get_user_by_email(email)
+    if not user:
+        return None
+    token = generate_reset_token()
+    expires = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_connection()
+    try:
+        conn.execute("INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)", 
+                     (user["id"], token, expires))
+        conn.commit()
+        return token
     finally:
         conn.close()
 
@@ -169,39 +198,35 @@ def get_open_sessions_for_student(student_id):
     finally:
         conn.close()
 
-# === REPORT ===
-def get_student_attendance_history(student_id):
+# === BÁO CÁO TỔNG HỢP TOÀN TRƯỜNG ===
+def get_school_attendance_report(start_date=None, end_date=None):
     conn = get_connection()
     try:
-        cur = conn.execute("""
-            SELECT ar.status, ar.note, ar.marked_at, asess.date, c.class_code, subj.subject_name
-            FROM Attendance ar
-            JOIN attendance_sessions asess ON asess.id = ar.session_id
-            JOIN class_subjects cs ON cs.id = asess.class_subject_id
-            JOIN classes c ON c.id = cs.class_id
-            JOIN subjects subj ON subj.id = cs.subject_id
-            WHERE ar.student_id = ?
-            ORDER BY asess.date DESC
-        """, (student_id,))
-        return rows_to_list(cur.fetchall())
-    finally:
-        conn.close()
-
-def get_class_daily_report(class_id):
-    conn = get_connection()
-    try:
-        cur = conn.execute("""
-            SELECT asess.date,
-                   COUNT(ar.id) AS total_records,
-                   SUM(CASE WHEN ar.status = 'PRESENT' THEN 1 ELSE 0 END) AS present_count,
-                   SUM(CASE WHEN ar.status LIKE 'ABSENT%' THEN 1 ELSE 0 END) AS absent_count,
-                   SUM(CASE WHEN ar.status = 'LATE' THEN 1 ELSE 0 END) AS late_count
-            FROM attendance_sessions asess
+        query = """
+            SELECT 
+                c.class_code,
+                c.class_name,
+                COUNT(DISTINCT s.id) AS total_students,
+                COUNT(DISTINCT asess.id) AS total_sessions,
+                SUM(CASE WHEN ar.status = 'PRESENT' THEN 1 ELSE 0 END) AS present_count,
+                SUM(CASE WHEN ar.status LIKE 'ABSENT%' THEN 1 ELSE 0 END) AS absent_count,
+                SUM(CASE WHEN ar.status = 'LATE' THEN 1 ELSE 0 END) AS late_count
+            FROM classes c
+            LEFT JOIN students s ON s.class_id = c.id
+            LEFT JOIN class_subjects cs ON cs.class_id = c.id
+            LEFT JOIN attendance_sessions asess ON asess.class_subject_id = cs.id AND asess.status = 'CLOSED'
             LEFT JOIN Attendance ar ON ar.session_id = asess.id
-            JOIN class_subjects cs ON cs.id = asess.class_subject_id
-            WHERE cs.class_id = ?
-            GROUP BY asess.date
-        """, (class_id,))
+        """
+        params = []
+        if start_date:
+            query += " AND asess.date >= ?"
+            params.append(start_date)
+        if end_date:
+            query += " AND asess.date <= ?"
+            params.append(end_date)
+        query += " GROUP BY c.id"
+        
+        cur = conn.execute(query, params)
         return rows_to_list(cur.fetchall())
     finally:
         conn.close()
