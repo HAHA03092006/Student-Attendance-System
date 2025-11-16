@@ -221,7 +221,7 @@ python src/gui.py
 ### Test Coverage
 - ✅ **18 test cases** – 100% functional coverage
 - ✅ **6 test cases** – Non-functional (security, performance)
-- 📄 Details: [Testing_Document.xlsx](docs/Testing_Document.xlsx)
+- 📄 Details: Testing_Document.xlsx
 
 ### Run tests
 ```bash
