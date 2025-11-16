@@ -1,5 +1,4 @@
-markdown# 
-Hệ Thống Điểm Danh Sinh Viên (Attendance System)
+#Hệ Thống Điểm Danh Sinh Viên (Attendance System)
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
 ![SQLite](https://img.shields.io/badge/SQLite-3.36-lightgrey?logo=sqlite)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)
@@ -20,15 +19,29 @@ Hệ Thống Điểm Danh Sinh Viên (Attendance System)
 
 **Báo cáo tổng hợp:** Sĩ số, số buổi, có mặt/vắng/muộn, **tỉ lệ điểm danh (%)**
 
+## Bảo mật & Hiệu năng
+
+- **Mật khẩu:** SHA-256 hash
+
+- **SQL Injection:** 100% parameterized queries
+
+- **Input validation:** Email, required fields, username
+  
+- **Error handling:** Try-catch toàn bộ DB
+  
+- **Hiệu năng:** Load 100 sinh viên < 5s
+
 
 ## Cấu trúc dự án
+├── auth.py              ← Hash, validate, verify
+├── main.py              ← Entry point
+├── gui.py               ← Full GUI (Login + 3 Dashboard)
+├── database.py
+├── schema.sql           ← Hash password
 ├── Dockerfile
 ├── docker-compose.yml
-├── schema.sql
-├── database.py
-├── gui.py
-├── attendance.db     ← tạo tự động
-├── data/            ← backup, log
+├── attendance.db        ← tạo tự động
+├── data/                ← backup
 └── README.md
 text
 ## Yêu cầu hệ thống
@@ -85,8 +98,8 @@ Công nghệ
 
 Python 3.11
 SQLite
-Tkinter
-Docker
+Tkinter (GUI tiếng Việt)
+Docker + Docker Compose
 
 
 
