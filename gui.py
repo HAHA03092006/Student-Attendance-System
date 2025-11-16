@@ -121,43 +121,58 @@ class StudentDashboard(BaseDashboard):
     
     def render_attend_view(self):
         title = tk.Label(self.content_frame, text="TỰ ĐIỂM DANH BUỔI HỌC", font=("Segoe UI", 16, "bold"), bg="white")
-        title.pack(anchor="w", padx=20, pady=10)
-
+        title.pack(anchor="w", padx=20, pady=10)      
         try:
-            sessions = db.get_open_sessions_for_student(self.user["id"])
-            if not sessions:
-                tk.Label(self.content_frame, text="Không có buổi học nào đang mở.", bg="white", fg="gray").pack(pady=20)
-                return
+            student_info = db.get_student_by_user_id(self.user["id"])
+            if not student_info:
+                tk.Label(self.content_frame, 
+                    text="Không tìm thấy thông tin sinh viên.", 
+                    bg="white", fg="red").pack(pady=20)
+            return
+        sessions = db.get_open_sessions_for_student(student_info["id"])
+        
+        if not sessions:
+            tk.Label(self.content_frame, 
+                    text="Không có buổi học nào đang mở.", 
+                    bg="white", fg="gray").pack(pady=20)
+            return
+        for sess in sessions:
+            frame = tk.Frame(self.content_frame, bg="#f8f9fa", relief="ridge", bd=1)
+            frame.pack(fill="x", padx=20, pady=8)
+            
+            info = f"{sess['class_code']} - {sess['subject_name']} | {sess['date']} | Mã: {sess['session_code']}"
+            tk.Label(frame, text=info, font=("Segoe UI", 10, "bold"), 
+                    bg="#f8f9fa", anchor="w").pack(fill="x", padx=10, pady=5)
 
-            for sess in sessions:
-                frame = tk.Frame(self.content_frame, bg="#f8f9fa", relief="ridge", bd=1)
-                frame.pack(fill="x", padx=20, pady=8)
+            status_frame = tk.Frame(frame, bg="#f8f9fa")
+            status_frame.pack(pady=5)
+            status_var = tk.StringVar(value="PRESENT")
+            for text, val in [("Có mặt", "PRESENT"), ("Vắng", "ABSENT"), 
+                             ("Vắng có phép", "ABSENT_EXCUSED")]:
+                tk.Radiobutton(status_frame, text=text, variable=status_var, 
+                              value=val, bg="#f8f9fa").pack(side="left", padx=10)
 
-                info = f"{sess['class_code']} - {sess['subject_name']} | {sess['date']} | Mã: {sess['session_code']}"
-                tk.Label(frame, text=info, font=("Segoe UI", 10, "bold"), bg="#f8f9fa", anchor="w").pack(fill="x", padx=10, pady=5)
+            note_entry = tk.Entry(frame, width=40)
+            note_entry.pack(pady=5, padx=10)
+            note_entry.insert(0, "Lý do (nếu vắng)")
 
-                status_frame = tk.Frame(frame, bg="#f8f9fa")
-                status_frame.pack(pady=5)
-                status_var = tk.StringVar(value="PRESENT")
-                for text, val in [("Có mặt", "PRESENT"), ("Vắng", "ABSENT"), ("Vắng có phép", "ABSENT_EXCUSED")]:
-                    tk.Radiobutton(status_frame, text=text, variable=status_var, value=val, bg="#f8f9fa").pack(side="left", padx=10)
+            def mark(session_id=sess["id"], student_id=student_info["id"]):
+                status = status_var.get()
+                note = note_entry.get().strip()
+                if note == "Lý do (nếu vắng)":
+                    note = ""
+                try:
+                    db.student_mark_attendance(student_id, session_id, status, note or None)
+                    messagebox.showinfo("Thành công", f"Đã điểm danh: {status}")
+                except Exception as e:
+                    messagebox.showerror("Lỗi", f"Không thể điểm danh: {e}")
 
-                note_entry = tk.Entry(frame, width=40)
-                note_entry.pack(pady=5, padx=10)
-                note_entry.insert(0, "Lý do (nếu vắng)")
-
-                def mark():
-                    status = status_var.get()
-                    note = note_entry.get().strip() if note_entry.get().strip() != "Lý do (nếu vắng)" else ""
-                    try:
-                        db.student_mark_attendance(self.user["id"], sess["id"], status, note or None)
-                        messagebox.showinfo("Thành công", f"Đã điểm danh: {status}")
-                    except Exception as e:
-                        messagebox.showerror("Lỗi", f"Không thể điểm danh: {e}")
-
-                tk.Button(frame, text="ĐIỂM DANH", command=mark, bg="#28a745", fg="white", font=("Segoe UI", 10, "bold")).pack(pady=5)
-        except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tải buổi học: {e}")
+            tk.Button(frame, text="ĐIỂM DANH", command=mark, 
+                     bg="#28a745", fg="white", 
+                     font=("Segoe UI", 10, "bold")).pack(pady=5)
+                     
+    except Exception as e:
+        messagebox.showerror("Lỗi", f"Không thể tải buổi học: {e}")
 
 # === LOGIN SCREEN ===
 class LoginScreen:
