@@ -2,12 +2,12 @@
 PRAGMA foreign_keys = ON;
 
 -- =========================================
--- 1. BẢNG USERS (TÀI KHOẢN ĐĂNG NHẬP)
+-- 1. USERS
 -- =========================================
 CREATE TABLE IF NOT EXISTS users (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     username        TEXT NOT NULL UNIQUE,
-    password_hash   TEXT NOT NULL,              -- sẽ lưu SHA-256 (demo: plain-text)
+    password_hash   TEXT NOT NULL,
     full_name       TEXT NOT NULL,
     email           TEXT NOT NULL UNIQUE,
     role            TEXT NOT NULL CHECK (role IN ('ADMIN','TEACHER','STUDENT')),
@@ -16,7 +16,20 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- =========================================
--- 2. BẢNG TEACHERS (GIẢNG VIÊN)
+-- 2. PASSWORD RESETS (QUÊN MẬT KHẨU)
+-- =========================================
+CREATE TABLE IF NOT EXISTS password_resets (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id         INTEGER NOT NULL,
+    token           TEXT NOT NULL UNIQUE,
+    expires_at      DATETIME NOT NULL,
+    used            INTEGER NOT NULL DEFAULT 0,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- =========================================
+-- 3. TEACHERS
 -- =========================================
 CREATE TABLE IF NOT EXISTS teachers (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +39,7 @@ CREATE TABLE IF NOT EXISTS teachers (
 );
 
 -- =========================================
--- 3. BẢNG LECTURER (GIẢNG VIÊN CHUNG – THEO DIAGRAM)
+-- 4. LECTURER (THEO DIAGRAM)
 -- =========================================
 CREATE TABLE IF NOT EXISTS Lecturer (
     LecturerID      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,7 +51,7 @@ CREATE TABLE IF NOT EXISTS Lecturer (
 );
 
 -- =========================================
--- 4. BẢNG CLASSES (LỚP HỌC)
+-- 5. CLASSES
 -- =========================================
 CREATE TABLE IF NOT EXISTS classes (
     id                      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,7 +63,7 @@ CREATE TABLE IF NOT EXISTS classes (
 );
 
 -- =========================================
--- 5. BẢNG COURSE (MÔN HỌC)
+-- 6. COURSE
 -- =========================================
 CREATE TABLE IF NOT EXISTS Course (
     CourseID        INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,7 +72,7 @@ CREATE TABLE IF NOT EXISTS Course (
 );
 
 -- =========================================
--- 6. BẢNG STUDENTS (HỌC SINH)
+-- 7. STUDENTS
 -- =========================================
 CREATE TABLE IF NOT EXISTS students (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +86,7 @@ CREATE TABLE IF NOT EXISTS students (
 );
 
 -- =========================================
--- 7. BẢNG SUBJECTS (MÔN HỌC CỤ THỂ)
+-- 8. SUBJECTS
 -- =========================================
 CREATE TABLE IF NOT EXISTS subjects (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,7 +95,7 @@ CREATE TABLE IF NOT EXISTS subjects (
 );
 
 -- =========================================
--- 8. BẢNG CLASS_SUBJECTS (LỚP + MÔN + GIÁO VIÊN)
+-- 9. CLASS_SUBJECTS
 -- =========================================
 CREATE TABLE IF NOT EXISTS class_subjects (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -96,7 +109,7 @@ CREATE TABLE IF NOT EXISTS class_subjects (
 );
 
 -- =========================================
--- 9. BẢNG ENROLLMENT (ĐĂNG KÝ HỌC)
+-- 10. ENROLLMENT
 -- =========================================
 CREATE TABLE IF NOT EXISTS Enrollment (
     EnrollmentID    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,7 +122,7 @@ CREATE TABLE IF NOT EXISTS Enrollment (
 );
 
 -- =========================================
--- 10. BẢNG ATTENDANCE_SESSIONS
+-- 11. ATTENDANCE_SESSIONS
 -- =========================================
 CREATE TABLE IF NOT EXISTS attendance_sessions (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -127,7 +140,7 @@ CREATE TABLE IF NOT EXISTS attendance_sessions (
 );
 
 -- =========================================
--- 11. BẢNG ATTENDANCE_RECORDS
+-- 12. ATTENDANCE_RECORDS
 -- =========================================
 CREATE TABLE IF NOT EXISTS Attendance (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -145,7 +158,7 @@ CREATE TABLE IF NOT EXISTS Attendance (
 );
 
 -- =========================================
--- 12. SEED DATA MẪU
+-- 13. SEED DATA – NGÀY HIỆN TẠI: 2025-11-16
 -- =========================================
 INSERT INTO users (username, password_hash, full_name, email, role) VALUES
     ('admin',       'admin123',     'Quản trị viên',        'admin@example.com',    'ADMIN'),
@@ -175,7 +188,7 @@ INSERT INTO Enrollment (student_id, class_id, enrollment_date, status) VALUES
     (2, 1, '2025-09-01', 'Active'),
     (3, 1, '2025-09-01', 'Active');
 
--- Buổi điểm danh mẫu
+-- Buổi điểm danh hôm nay: 16/11/2025
 INSERT INTO attendance_sessions (class_subject_id, session_code, date, status, created_by)
 VALUES (1, 'CNPM01_2025-11-16', '2025-11-16', 'ACTIVE', 1);
 
