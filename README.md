@@ -54,19 +54,31 @@ bash
 3.Mở GUI
 
    * Windows: VcXsrv hoặc Docker Desktop WSL2
+   
    * Mac: Tự động
+   
    * Linux:
+   
      bash
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xhost +local:docker &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;docker-compose up --build &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+     
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xhost +local:docker
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;docker-compose up --build 
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 Hướng dẫn chạy (Local)
+
 bash
+
 textpython -c "import database; database.init_db()"
 python gui.py
+
 Đăng nhập mẫu
+
 UserPassRoleadminadmin123ADMINt_giangteacher123TEACHERsv001student123STUDENT
+
 Test Coverage
 
 18 test cases – 100% functional
+
 Xem: docs/Testing_Document.xlsx
 
 Công nghệ
