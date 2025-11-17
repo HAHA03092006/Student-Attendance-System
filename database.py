@@ -106,7 +106,7 @@ def get_students_in_class(class_id: int):
     try:
         cur = conn.execute("""
             SELECT s.id AS student_id, s.student_code, u.full_name, s.gender, u.email
-            FROM students s JOIN users u ON u.id = s.user_id
+            FROM students s JOIN113 users u ON u.id = s.user_id
             WHERE s.class_id = ?
         """, (class_id,))
         return rows_to_list(cur.fetchall())
@@ -228,5 +228,53 @@ def get_school_attendance_report(start_date=None, end_date=None):
         
         cur = conn.execute(query, params)
         return rows_to_list(cur.fetchall())
+    finally:
+        conn.close()
+
+# === MỚI: HỖ TRỢ QUẢN LÝ LỚP & NGƯỜI DÙNG ===
+def get_all_classes_with_stats():
+    conn = get_connection()
+    try:
+        cur = conn.execute("""
+            SELECT c.class_code, c.class_name, 
+                   COUNT(s.id) AS total_students,
+                   u.full_name AS homeroom_teacher
+            FROM classes c
+            LEFT JOIN students s ON s.class_id = c.id
+            LEFT JOIN teachers t ON t.id = c.homeroom_teacher_id
+            LEFT JOIN users u ON u.id = t.user_id
+            GROUP BY c.id
+        """)
+        return rows_to_list(cur.fetchall())
+    finally:
+        conn.close()
+
+def create_class(class_code, class_name):
+    conn = get_connection()
+    try:
+        conn.execute("INSERT INTO classes (class_code, class_name) VALUES (?, ?)", 
+                    (class_code, class_name))
+        conn.commit()
+    finally:
+        conn.close()
+
+def get_all_users():
+    conn = get_connection()
+    try:
+        cur = conn.execute("SELECT * FROM users")
+        return rows_to_list(cur.fetchall())
+    finally:
+        conn.close()
+
+def create_user(username, password, full_name, email, role):
+    from auth import hash_password
+    conn = get_connection()
+    try:
+        password_hash = hash_password(password)
+        conn.execute("""
+            INSERT INTO users (username, password_hash, full_name, email, role)
+            VALUES (?, ?, ?, ?, ?)
+        """, (username, password_hash, full_name, email, role))
+        conn.commit()
     finally:
         conn.close()
