@@ -63,6 +63,125 @@ class AdminDashboard(BaseDashboard):
             ("report", "Báo cáo tổng hợp", "#E64A19"),
         ]
     
+    def render_classes_view(self):
+        title = tk.Label(self.content_frame, text="QUẢN LÝ LỚP HỌC", font=("Segoe UI", 16, "bold"), bg="white")
+        title.pack(pady=10)
+
+        tk.Button(self.content_frame, text="Thêm lớp mới", bg="#7B1FA2", fg="white", 
+                 command=self.add_class).pack(pady=5)
+
+        cols = ("Mã lớp", "Tên lớp", "Sĩ số", "GV chủ nhiệm")
+        tree = ttk.Treeview(self.content_frame, columns=cols, show="headings", height=15)
+        for col in cols:
+            tree.heading(col, text=col)
+            tree.column(col, width=150, anchor="center")
+        tree.pack(pady=10, fill="both", expand=True)
+
+        try:
+            classes = db.get_all_classes_with_stats()
+            for cls in classes:
+                tree.insert("", "end", values=(
+                    cls['class_code'], cls['class_name'], 
+                    cls['total_students'] or 0, cls['homeroom_teacher'] or "Chưa có"
+                ))
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không tải được lớp: {e}")
+
+    def add_class(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Thêm lớp mới")
+        dialog.geometry("400x300")
+        dialog.configure(bg="white")
+
+        tk.Label(dialog, text="Mã lớp:", bg="white").pack(pady=5)
+        code_entry = tk.Entry(dialog, width=30)
+        code_entry.pack(pady=5)
+
+        tk.Label(dialog, text="Tên lớp:", bg="white").pack(pady=5)
+        name_entry = tk.Entry(dialog, width=30)
+        name_entry.pack(pady=5)
+
+        def save():
+            code = code_entry.get().strip()
+            name = name_entry.get().strip()
+            if not code or not name:
+                messagebox.showerror("Lỗi", "Vui lòng điền đầy đủ!")
+                return
+            try:
+                db.create_class(code, name)
+                messagebox.showinfo("Thành công", "Đã thêm lớp!")
+                dialog.destroy()
+                self.switch_view("classes")
+            except Exception as e:
+                messagebox.showerror("Lỗi", f"Không thêm được: {e}")
+
+        tk.Button(dialog, text="Lưu", command=save, bg="#7B1FA2", fg="white").pack(pady=20)
+
+    def render_users_view(self):
+        title = tk.Label(self.content_frame, text="QUẢN LÝ NGƯỜI DÙNG", font=("Segoe UI", 16, "bold"), bg="white")
+        title.pack(pady=10)
+
+        tk.Button(self.content_frame, text="Thêm người dùng", bg="#7B1FA2", fg="white", 
+                 command=self.add_user).pack(pady=5)
+
+        cols = ("Tên đăng nhập", "Họ tên", "Email", "Vai trò", "Trạng thái")
+        tree = ttk.Treeview(self.content_frame, columns=cols, show="headings", height=15)
+        for col in cols:
+            tree.heading(col, text=col)
+            tree.column(col, width=150, anchor="center")
+        tree.pack(pady=10, fill="both", expand=True)
+
+        try:
+            users = db.get_all_users()
+            for user in users:
+                tree.insert("", "end", values=(
+                    user['username'], user['full_name'], user['email'],
+                    user['role'], "Hoạt động" if user['is_active'] else "Khóa"
+                ))
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không tải được: {e}")
+
+    def add_user(self):
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Thêm người dùng")
+        dialog.geometry("400x500")
+        dialog.configure(bg="white")
+
+        fields = [
+            ("Tên đăng nhập:", "username"),
+            ("Mật khẩu:", "password", True),
+            ("Họ tên:", "full_name"),
+            ("Email:", "email"),
+            ("Vai trò:", "role", ["ADMIN", "TEACHER", "STUDENT"])
+        ]
+        entries = {}
+        for label, key, *options in fields:
+            tk.Label(dialog, text=label, bg="white").pack(pady=5)
+            if len(options) > 0 and isinstance(options[0], list):
+                var = tk.StringVar(value=options[0][0])
+                ttk.Combobox(dialog, textvariable=var, values=options[0], state="readonly").pack(pady=5)
+                entries[key] = var
+            else:
+                show = "*" if len(options) > 0 and options[0] else ""
+                entry = tk.Entry(dialog, width=30, show=show)
+                entry.pack(pady=5)
+                entries[key] = entry
+
+        def save():
+            data = {k: v.get().strip() if hasattr(v, 'get') else v.get() for k, v in entries.items()}
+            if not all(data.values()):
+                messagebox.showerror("Lỗi", "Điền đầy đủ!")
+                return
+            try:
+                db.create_user(**data)
+                messagebox.showinfo("Thành công", "Đã thêm người dùng!")
+                dialog.destroy()
+                self.switch_view("users")
+            except Exception as e:
+                messagebox.showerror("Lỗi", f"Không thêm được: {e}")
+
+        tk.Button(dialog, text="Lưu", command=save, bg="#7B1FA2", fg="white").pack(pady=20)
+
     def render_report_view(self):
         title = tk.Label(self.content_frame, text="BÁO CÁO TỔNG HỢP TOÀN TRƯỜNG", font=("Segoe UI", 16, "bold"), bg="white")
         title.pack(pady=10)
@@ -103,7 +222,7 @@ class AdminDashboard(BaseDashboard):
         tree.pack(padx=20, pady=10, fill="both", expand=True)
         load()
 
-# === TEACHER DASHBOARD ===
+# === TEACHER & STUDENT DASHBOARD (giữ nguyên) ===
 class TeacherDashboard(BaseDashboard):
     def get_menu_items(self):
         return [
@@ -111,7 +230,6 @@ class TeacherDashboard(BaseDashboard):
             ("history", "Lịch sử", "#F57C00"),
         ]
 
-# === STUDENT DASHBOARD ===
 class StudentDashboard(BaseDashboard):
     def get_menu_items(self):
         return [
@@ -121,58 +239,43 @@ class StudentDashboard(BaseDashboard):
     
     def render_attend_view(self):
         title = tk.Label(self.content_frame, text="TỰ ĐIỂM DANH BUỔI HỌC", font=("Segoe UI", 16, "bold"), bg="white")
-        title.pack(anchor="w", padx=20, pady=10)      
+        title.pack(anchor="w", padx=20, pady=10)
+
         try:
-            student_info = db.get_student_by_user_id(self.user["id"])
-            if not student_info:
-                tk.Label(self.content_frame, 
-                    text="Không tìm thấy thông tin sinh viên.", 
-                    bg="white", fg="red").pack(pady=20)
-            return
-        sessions = db.get_open_sessions_for_student(student_info["id"])
-        
-        if not sessions:
-            tk.Label(self.content_frame, 
-                    text="Không có buổi học nào đang mở.", 
-                    bg="white", fg="gray").pack(pady=20)
-            return
-        for sess in sessions:
-            frame = tk.Frame(self.content_frame, bg="#f8f9fa", relief="ridge", bd=1)
-            frame.pack(fill="x", padx=20, pady=8)
-            
-            info = f"{sess['class_code']} - {sess['subject_name']} | {sess['date']} | Mã: {sess['session_code']}"
-            tk.Label(frame, text=info, font=("Segoe UI", 10, "bold"), 
-                    bg="#f8f9fa", anchor="w").pack(fill="x", padx=10, pady=5)
+            sessions = db.get_open_sessions_for_student(self.user["id"])
+            if not sessions:
+                tk.Label(self.content_frame, text="Không có buổi học nào đang mở.", bg="white", fg="gray").pack(pady=20)
+                return
 
-            status_frame = tk.Frame(frame, bg="#f8f9fa")
-            status_frame.pack(pady=5)
-            status_var = tk.StringVar(value="PRESENT")
-            for text, val in [("Có mặt", "PRESENT"), ("Vắng", "ABSENT"), 
-                             ("Vắng có phép", "ABSENT_EXCUSED")]:
-                tk.Radiobutton(status_frame, text=text, variable=status_var, 
-                              value=val, bg="#f8f9fa").pack(side="left", padx=10)
+            for sess in sessions:
+                frame = tk.Frame(self.content_frame, bg="#f8f9fa", relief="ridge", bd=1)
+                frame.pack(fill="x", padx=20, pady=8)
 
-            note_entry = tk.Entry(frame, width=40)
-            note_entry.pack(pady=5, padx=10)
-            note_entry.insert(0, "Lý do (nếu vắng)")
+                info = f"{sess['class_code']} - {sess['subject_name']} | {sess['date']} | Mã: {sess['session_code']}"
+                tk.Label(frame, text=info, font=("Segoe UI", 10, "bold"), bg="#f8f9fa", anchor="w").pack(fill="x", padx=10, pady=5)
 
-            def mark(session_id=sess["id"], student_id=student_info["id"]):
-                status = status_var.get()
-                note = note_entry.get().strip()
-                if note == "Lý do (nếu vắng)":
-                    note = ""
-                try:
-                    db.student_mark_attendance(student_id, session_id, status, note or None)
-                    messagebox.showinfo("Thành công", f"Đã điểm danh: {status}")
-                except Exception as e:
-                    messagebox.showerror("Lỗi", f"Không thể điểm danh: {e}")
+                status_frame = tk.Frame(frame, bg="#f8f9fa")
+                status_frame.pack(pady=5)
+                status_var = tk.StringVar(value="PRESENT")
+                for text, val in [("Có mặt", "PRESENT"), ("Vắng", "ABSENT"), ("Vắng có phép", "ABSENT_EXCUSED")]:
+                    tk.Radiobutton(status_frame, text=text, variable=status_var, value=val, bg="#f8f9fa").pack(side="left", padx=10)
 
-            tk.Button(frame, text="ĐIỂM DANH", command=mark, 
-                     bg="#28a745", fg="white", 
-                     font=("Segoe UI", 10, "bold")).pack(pady=5)
-                     
-    except Exception as e:
-        messagebox.showerror("Lỗi", f"Không thể tải buổi học: {e}")
+                note_entry = tk.Entry(frame, width=40)
+                note_entry.pack(pady=5, padx=10)
+                note_entry.insert(0, "Lý do (nếu vắng)")
+
+                def mark():
+                    status = status_var.get()
+                    note = note_entry.get().strip() if note_entry.get().strip() != "Lý do (nếu vắng)" else ""
+                    try:
+                        db.student_mark_attendance(self.user["id"], sess["id"], status, note or None)
+                        messagebox.showinfo("Thành công", f"Đã điểm danh: {status}")
+                    except Exception as e:
+                        messagebox.showerror("Lỗi", f"Không thể điểm danh: {e}")
+
+                tk.Button(frame, text="ĐIỂM DANH", command=mark, bg="#28a745", fg="white", font=("Segoe UI", 10, "bold")).pack(pady=5)
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể tải buổi học: {e}")
 
 # === LOGIN SCREEN ===
 class LoginScreen:
@@ -183,19 +286,16 @@ class LoginScreen:
         
         tk.Label(self.frame, text="ĐĂNG NHẬP HỆ THỐNG", font=("Segoe UI", 20, "bold"), bg="white", fg="#1976D2").pack(pady=30)
         
-        # Username
         tk.Label(self.frame, text="Tên đăng nhập:", bg="white", font=("Segoe UI", 10)).pack(anchor="w", padx=100)
         self.username_entry = tk.Entry(self.frame, width=35, font=("Segoe UI", 11))
         self.username_entry.pack(pady=8, padx=100)
         self.username_entry.focus()
         
-        # Password
         tk.Label(self.frame, text="Mật khẩu:", bg="white", font=("Segoe UI", 10)).pack(anchor="w", padx=100)
         self.password_entry = tk.Entry(self.frame, width=35, font=("Segoe UI", 11), show="*")
         self.password_entry.pack(pady=8, padx=100)
         self.password_entry.bind("<Return>", lambda e: self.login())
         
-        # Buttons
         btn_frame = tk.Frame(self.frame, bg="white")
         btn_frame.pack(pady=25)
         tk.Button(btn_frame, text="Đăng nhập", command=self.login, bg="#1976D2", fg="white", font=("Segoe UI", 11, "bold"), width=15).pack(side="left", padx=10)
@@ -205,7 +305,6 @@ class LoginScreen:
         username = self.username_entry.get().strip()
         password = self.password_entry.get()
         
-        # Validation
         if err := validate_required(username, "Tên đăng nhập"): messagebox.showerror("Lỗi", err); return
         if err := validate_username(username): messagebox.showerror("Lỗi", err); return
         if err := validate_required(password, "Mật khẩu"): messagebox.showerror("Lỗi", err); return
@@ -240,3 +339,14 @@ class LoginScreen:
                 messagebox.showerror("Lỗi", "Email không tồn tại trong hệ thống.")
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể gửi yêu cầu: {e}")
+
+if __name__ == "__main__":
+    import database
+    database.init_db()
+    root = tk.Tk()
+    root.title("Hệ Thống Điểm Danh Sinh Viên - Nhóm 03")
+    root.geometry("1100x700")
+    root.minsize(1000, 600)
+    root.configure(bg="#f5f5f5")
+    LoginScreen(root)
+    root.mainloop()
